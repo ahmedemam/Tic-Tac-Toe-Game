@@ -11,8 +11,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -43,9 +41,10 @@ public class DBService {
         return this.row;
     }
     
+    //retrieves coloumn names of specific table using metadata to pass it into SQL queries
     private String getColsNames(String tableName) throws SQLException, ClassNotFoundException{
         
-        String colNames = "(" ; 
+        String colNames = "" ; 
         String q2 = "select * from "+tableName ; 
        
         
@@ -57,11 +56,12 @@ public class DBService {
             {
                    colNames+=(this.rsmd.getColumnName(i)+",");  
             }
-            colNames+=(this.rsmd.getColumnName(this.rsmd.getColumnCount())+")") ;  
+            colNames+=(this.rsmd.getColumnName(this.rsmd.getColumnCount())) ;  
          
       return colNames ; 
     }
     
+    //retrieves corresponding parammeters
     private String getQueryParm()
     {
         
@@ -76,14 +76,24 @@ public class DBService {
     }
  
     
+    private void considerDatatype() throws SQLException
+    {
+        int i;
+        for (i = 0; i < this.row.size(); i++) 
+            if ("VARCHAR".equalsIgnoreCase(rsmd.getColumnTypeName(i+2)))
+                pst.setString(i+1,this.getRow().get(i));
+            else if ("INT".equalsIgnoreCase(rsmd.getColumnTypeName(i+2)))
+                pst.setInt(i+1, Integer.parseInt(this.getRow().get(i)) );
+    }
+    
     //insert Function 
     public int insert(String table_name) throws SQLException, ClassNotFoundException{
   
         int row_affected=0;
         
         //get columns names
-        String col_names = getColsNames(table_name) ;
-
+        String col_names = "( "+getColsNames(table_name)+" )" ;
+        System.out.print(col_names);
         //get '?' structure
         String q_params = getQueryParm(); 
 
@@ -92,13 +102,7 @@ public class DBService {
          
         this.pst = con.getConnection().prepareStatement(query) ;
 
-        for (int i = 0; i < this.row.size(); i++) 
-        
-            if ("VARCHAR".equalsIgnoreCase(rsmd.getColumnTypeName(i+2)))
-                pst.setString(i+1,this.getRow().get(i));
-                
-            else if ("INT".equalsIgnoreCase(rsmd.getColumnTypeName(i+2)))
-                pst.setInt(i+1, Integer.parseInt(this.getRow().get(i)) );
+        this.considerDatatype();
         
         row_affected=pst.executeUpdate();
      
@@ -115,61 +119,32 @@ public class DBService {
         row_affected = pst.executeUpdate();
         return row_affected;
     }
-    
-    
-    //update Function
-    public int update(String table_name,Map<String, String> newval, int id) throws SQLException, ClassNotFoundException
-    {
-        int row_affected=0;
-        
-         //String col_names = getColsNames(table_name);
-        for(Map.Entry<String,String>entry:newval.entrySet())
-        {
-             String query = "update "+table_name+" set "+entry.getKey()+"="+entry.getValue()+" where id="+id ;
-             this.pst = con.getConnection().prepareStatement(query) ;
-            
-             for (int i = 0; i < newval.size(); i++) 
-                 
-                 if ("VARCHAR".equalsIgnoreCase(rsmd.getColumnTypeName(i+2)))
-                     pst.setString(i+1,entry.getValue());
-                 
-                 else if ("INT".equalsIgnoreCase(rsmd.getColumnTypeName(i+2)))
-                     pst.setInt(i+1, Integer.parseInt(entry.getValue()) );
-        
-        }
 
+    //update Function
+    public int update(String table_name,int id) throws SQLException, ClassNotFoundException
+    {
+        String col_names=getColsNames(table_name);
+        String col_arr[]=col_names.split(",");
+        String q_param="";
+        int row_affected=0;
+        int i;
+
+        for( i=0;i<col_arr.length-1;i++)
+        {
+            System.out.println(col_arr[i]);
+            q_param+=col_arr[i]+"= ?,";
+        }
+            q_param+=col_arr[i]+"= ?";
+
+        String query = "update "+table_name+" set "+q_param+" where id = "+id;
+
+        this.pst = con.getConnection().prepareStatement(query);
+        
+        this.considerDatatype();
+        
         row_affected=pst.executeUpdate();
         
         return row_affected;
     }
-   
-    
-    
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        // TODO code application logic here
-        DBConnection con = DBConnection.getConnectionInstance();
-        DBService obj = new DBService(con) ; 
-        
-        ArrayList<String> valArr = new ArrayList<>() ; 
-        Map <String,String>val=new HashMap<>();
-        val.put("name", "hager");
-        //val.put("score", "20");
-       int updated=obj.update("player", val, 5);
-       // valArr.add("5");
-//        valArr.add("Mohamed"); //name 
-//        valArr.add( "123456" ); // password
-//        valArr.add("online"); // online state 
-//        valArr.add("Mohamed@gmail.com") ; // email
-//        valArr.add("14"); // score 
-//        valArr.add("win"); // player state
-//        valArr.add("fb.com"); // facebook url 
-//         obj.setRow(valArr);
-//         int inserted=obj.insert("player") ;
-//         
-//         int deleted=obj.delete("player", 5);
-         con.closeConnection();
-         System.out.println(updated+" row affected");
-         
 
-    }
 }
