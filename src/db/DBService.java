@@ -150,11 +150,10 @@ public class DBService {
     public  ArrayList<String> getRecord(String table_name,int id) throws SQLException
     {
         String query="select * from "+table_name+" where id ="+id;
+
         this.pst = con.getConnection().prepareStatement(query);
-        
         this.rs=pst.executeQuery();
-        
-        
+
         int count=rs.getMetaData().getColumnCount();
         
         while(rs.next())
@@ -168,16 +167,5 @@ public class DBService {
         }
     
         return this.row;
-    }
-    public static void main(String args[]) throws SQLException, ClassNotFoundException
-    {
-        ArrayList<String> record = new ArrayList();
-        DBConnection con = DBConnection.getConnectionInstance();
-        DBService serv= new DBService(con);
-        
-                
-        record = serv.getRecord("player", 21);
-         for(int i=0;i<record.size();i++)
-            System.out.println(record.get(i));
     }
 }
