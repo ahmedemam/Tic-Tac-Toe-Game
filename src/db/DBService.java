@@ -24,7 +24,7 @@ public class DBService {
     ResultSet rs ; 
     Statement stmt ; 
     ResultSetMetaData rsmd ;
-    ArrayList<String> row=new ArrayList<String>();
+    ArrayList<String> row;
     
     public DBService(DBConnection con)
     {
@@ -149,6 +149,7 @@ public class DBService {
     
     public  ArrayList<String> getRecord(String table_name,int id) throws SQLException
     {
+        this.row=new ArrayList<String>();
         String query="select * from "+table_name+" where id ="+id;
 
         this.pst = con.getConnection().prepareStatement(query);
@@ -168,4 +169,5 @@ public class DBService {
     
         return this.row;
     }
+
 }
