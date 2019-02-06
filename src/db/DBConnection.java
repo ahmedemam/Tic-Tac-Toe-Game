@@ -7,12 +7,7 @@ package db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 /**
  *
  * @author hagar
@@ -60,12 +55,4 @@ public class DBConnection
         this.con.close();
     }
 
-    
-    public static void main(String[] args) throws ClassNotFoundException, SQLException {
-        // TODO code application logic here
-        DBConnection instance = DBConnection.getConnectionInstance() ; 
-        System.out.println("test test test 1..2..3  "+ instance);
-        
-         
-    }
 }
