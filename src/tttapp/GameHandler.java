@@ -18,11 +18,12 @@ import java.util.ArrayList;
  */
 public class GameHandler extends Thread{
     
-     DataInputStream dis ; 
+    DataInputStream dis ; 
     PrintStream ps ; 
     static ArrayList <GameHandler> players = new ArrayList<>() ; 
     static int count = 0 ; 
     int pid ; 
+    String msgToPlayer ;
     // linkedhashmap - data 
     
     public GameHandler(Socket s){
@@ -32,9 +33,10 @@ public class GameHandler extends Thread{
              dis = new DataInputStream(s.getInputStream()) ;
              ps = new PrintStream(s.getOutputStream()) ;
              count++ ; 
-             pid = count ;         
-             System.out.println("Player : "+pid+" Coneected with socket : "+s);
-             ps.println(pid);
+             pid = count ;
+             msgToPlayer = "YOUR DATA is "+pid+" Player:"+pid ;
+             //System.out.println("Player : "+pid+" Coneected with socket : "+s);
+             ps.println(msgToPlayer);
              players.add(this) ; 
              
              start() ;
@@ -50,46 +52,61 @@ public class GameHandler extends Thread{
         
         int tileX ,tileY , toID , fromID ; 
        
-        String playInfo ; 
-        String [] playInfoArr ; 
+        String msgRecived ; 
+        String [] msgInfoArr ; 
         
         try{
             while(true){
               
-                playInfo = dis.readLine() ; 
+                msgRecived = dis.readLine() ; 
                // System.out.println("play: "+playInfo);
-               if(playInfo.length()>0){
-                   System.out.println("");
+               if(msgRecived.length()>0){
+                   System.out.println("MSG Rec : "+msgRecived);
                
-               playInfoArr = playInfo.split(" ") ;
+               msgInfoArr = msgRecived.split(" ") ;
+               
+               if ("GAME".equals(msgInfoArr[0]) && "PLAY".equals(msgInfoArr[1])){
                 
-                fromID = Integer.parseInt(playInfoArr[2]) ;    
-                toID  = Integer.parseInt( playInfoArr[3] ); // Recieve id of player to send it to 
-                tileX = Integer.parseInt( playInfoArr[4] ); // Recieve Row Of play
-                tileY = Integer.parseInt( playInfoArr[5] ); // Recieve Col of play 
-                // send play to opponent 
-              send(tileX,tileY,toID) ; 
+                fromID = Integer.parseInt( msgInfoArr[2]) ;    
+                toID  = Integer.parseInt( msgInfoArr[3] ); // Recieve id of player to send it to 
+                tileX = Integer.parseInt( msgInfoArr[4] ); // Recieve Row Of play
+                tileY = Integer.parseInt( msgInfoArr[5] ); // Recieve Col of play 
+                
+              msgToPlayer = "GAME PLAY "+fromID+" "+toID+" "+tileX+" "+tileY ;
+             // send play to opponent 
+              send(msgToPlayer) ; 
                } 
-                
-//                System.out.println("There is play to "+toID+" in row : "+tileX+"and Col : "+tileY);
-                // send play to opponent 
-//              send(tileX,tileY,toID) ; 
-            }
+               
+               }
+            }         
+//    
         }catch(Exception ex){
             ex.printStackTrace();
         }
     }
     
-    public void  send(int tileX , int tileY , int toID){
-        String playInfoToSend = tileX+" "+tileY ;
-        System.out.println("playInfoToSend "+playInfoToSend );
-        for (GameHandler gh : players){
+    public void  send(String msg){
+        
+//        String playInfoToSend = tileX+" "+tileY ;
+//        System.out.println("playInfoToSend "+playInfoToSend );
+
+
+        System.out.println("Message From Send Fun : "+msg);
+   String msgArr[] = msg.split(" ") ;
+   int toID  ; 
+   if ("GAME".equals(msgArr[0]) && "PLAY".equals(msgArr[1])){
+   
+       toID  = Integer.parseInt( msgArr[3] )  ; 
+    for (GameHandler gh : players){
             if (gh.pid == toID){
                
-               gh.ps.println(playInfoToSend);
+               gh.ps.println(msg);
                //gh.ps.println(tileY);
            
             }
         }
+   }
+   
+       
     }
 }

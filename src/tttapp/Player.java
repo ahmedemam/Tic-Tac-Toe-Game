@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package player;
+package tttapp;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -22,6 +22,8 @@ import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -42,14 +44,18 @@ public class Player extends Application {
     private ArrayList<Combo> combos = new ArrayList<>();
     private Tile[][] board = new Tile[3][3];
     Pane root = new Pane();
+    Parent rTest ;
 
     private Socket socket;
     private PrintStream ps;
     private DataInputStream dis;
-    private int myId, opponentId;
+    private static int myId , opponentId , myScore = 0  , oppScore = 0 ;  
     private int oppPlayX, oppPlayY;
-    private String myPlayDescription, oppoPlayDescription = "";
-    private String[] oppoPlayDescriptionArray;
+    private String myPlayDescription, myUserName , msgFromServer;
+    private String[] msgFromServerArray;
+    private int movesCounter = 0 ; 
+    private boolean iWin= false , oppWin=false ,tie = false; 
+    private Label userNameLabel , myScoreLabel , oppScoreLabel ;     
 
     //start Player Constructor      
     public Player() {
@@ -57,13 +63,23 @@ public class Player extends Application {
         try {
 
             //Connecting to server      
-            socket = new Socket("192.168.1.165", 5552);
+            socket = new Socket("localhost", 5552);
             ps = new PrintStream(socket.getOutputStream());
             dis = new DataInputStream(socket.getInputStream());
-// storing recieved id from server 
-            myId = Integer.parseInt(dis.readLine());
-
-            System.out.println("My ID : " + myId);
+            // storing recieved id from server 
+            msgFromServer = dis.readLine() ; 
+            System.out.println("Message : "+msgFromServer);
+            
+            msgFromServerArray = msgFromServer.split(" ") ;
+            
+            if ("YOUR".equals(msgFromServerArray[0]) && "DATA".equals(msgFromServerArray[1]))
+            myId = Integer.parseInt(msgFromServerArray[3]);
+            myUserName = msgFromServerArray[4] ; 
+           System.out.println("My ID : " + myId);
+            System.out.println("MY UserName : "+myUserName);
+             userNameLabel = new Label() ;
+         myScoreLabel = new Label() ;
+         oppScoreLabel = new Label () ; 
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -78,24 +94,33 @@ public class Player extends Application {
                     while (true) {
                         try {
 
-                            oppoPlayDescription = dis.readLine();
-                            System.out.println(oppoPlayDescription);
-                              oppoPlayDescriptionArray=oppoPlayDescription.split(" ") ;
+                        //    oppoPlayDescription = dis.readLine();
+                               msgFromServer = dis.readLine() ; 
+                                 System.out.println("Message in Thread : "+msgFromServer);
+                            
+                                 System.out.println(msgFromServer);
                               
-                              for (int i = 0; i < oppoPlayDescriptionArray.length; i++) {
-                                  System.out.println("item "+i+" "+oppoPlayDescriptionArray[i]);
-                            }
-                              oppPlayX = Integer.parseInt(oppoPlayDescriptionArray[0]) ;
-                              oppPlayY = Integer.parseInt(oppoPlayDescriptionArray[1])  ;
+                                 msgFromServerArray = msgFromServer.split(" ") ;
                               
+//                              for (int i = 0; i < oppoPlayDescriptionArray.length; i++) {
+//                                  System.out.println("item "+i+" "+oppoPlayDescriptionArray[i]);
+//                            }
+                              
+                              if ("GAME".equals(msgFromServerArray[0]) && "PLAY".equals(msgFromServerArray[1])){
+                              oppPlayX = Integer.parseInt(msgFromServerArray[4]) ;
+                              oppPlayY = Integer.parseInt(msgFromServerArray[5])  ;
+                              }
                               if (oppPlayX > -1 && oppPlayY > -1)
                               {
                               System.out.println("Recieved play from opponent at "+oppPlayX
                                       +" Row and Col : "+oppPlayY);
-                               if (myId%2 != 0 )
+                              
+                              if (myId%2 != 0 )
                               board[oppPlayY][oppPlayX].drawO();
                                if(myId %2== 0)
-                                   board[oppPlayY][oppPlayX].drawX();
+                               board[oppPlayY][oppPlayX].drawX();
+                               
+                              
                                board[oppPlayY][oppPlayX].usedBefore = true;
                                 myTurn = true ; 
                                 
@@ -120,20 +145,42 @@ public class Player extends Application {
         }).start();
     }
 
-    private Parent createContent() {
-
+public void updateLabels(){
+        
+        System.out.println("UserName: "+myUserName +"My Score : "+myScore+"Opp Score : "+oppScore);
+        userNameLabel.setText("UserName : "+ myUserName);
+        myScoreLabel.setText("Your Score : "+ myScore);
+        oppScoreLabel.setText("Opponent Score : "+ oppScore) ; 
+}
+    
+    
+    public Parent createContent() {
+        
+       updateLabels() ; 
         // Border Size 
-        root.setPrefSize(800, 600);
+        root.setPrefSize(600, 650);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 Tile tile = new Tile();
                 tile.setTranslateX(j * 200);
-                tile.setTranslateY(i * 200);
+                tile.setTranslateY(50 +(i * 200));
 
                 root.getChildren().add(tile);
                 board[j][i] = tile;
             }
         }
+        userNameLabel.setTranslateX(50);
+        userNameLabel.setTranslateY(25);
+        
+        
+        myScoreLabel.setTranslateX(250);
+        myScoreLabel.setTranslateY(25);
+        
+        oppScoreLabel.setTranslateX(450);
+        oppScoreLabel.setTranslateY(25);
+        
+        root.getChildren().addAll(userNameLabel , myScoreLabel , oppScoreLabel) ;
+        
 
         // Cases on it Player Win     
         //Horizontal
@@ -153,32 +200,45 @@ public class Player extends Application {
         return root;
     }
 
+    
+    
+    
 //    Player Stage 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws IOException {
 
-        Scene scene = new Scene(createContent());
-
+         
+        Scene PlayScene = new Scene(createContent());
+//        Scene YouWinScene = new Scene (createWinContent()) ; 
+        
         primaryStage.setTitle("Tic Tac Toe App");
-        primaryStage.setScene(scene);
+        
+            primaryStage.setScene(PlayScene);
+//        
         primaryStage.show();
     }
 
 //    check if somebody win  
     private void checkState() {
-
+          
+        movesCounter++ ; 
         for (Combo combo : combos) {
             if (combo.isComplete()) {
                 playable = false;
-                playWinAnimation(combo);
+                playAnimation(combo);
                 break;
             }
+        }
+        if(movesCounter == 9 && !iWin && !oppWin){  // on Tie Case 
+             tie = true ; 
+             AfterGame b = new AfterGame() ;
+             root.getChildren().add(b);
         }
     }
     Line line;
 
     // Win Animation
-    private void playWinAnimation(Combo combo) {
+    private void playAnimation(Combo combo) {
         line = new Line();
         line.setStartX(combo.tiles[0].getCenterX());
         line.setStartY(combo.tiles[0].getCenterY());
@@ -192,6 +252,90 @@ public class Player extends Application {
                 new KeyValue(line.endYProperty(), combo.tiles[2].getCenterY())
         ));
         timeline.play();
+         
+        AfterGame a = new AfterGame() ;
+        root.getChildren().add(a);
+    }
+    
+    private class AfterGame extends StackPane{
+      
+        Rectangle rect ; 
+        Text msg ;
+        Button playAgain ; 
+        public AfterGame(){
+            
+        
+        rect = new Rectangle() ;
+        msg = new Text() ; 
+        playAgain = new Button("Play Again") ; 
+        
+        rect.setFill(Color.BLACK);
+        rect.setStroke(Color.BLACK);
+        rect.setOpacity(0.3); 
+        rect.setX(0);
+        rect.setY(0);
+        rect.setWidth(600);
+        rect.setHeight(0);
+      
+        this.setAlignment(Pos.CENTER) ; // start writing from Center 
+        this.msg.setFont(Font.font(0)) ; // increase Text (x or O ) Size 
+        
+        if (myTurn && !tie){
+                
+            this.msg.setFill(Color.RED);
+            this.msg.setText("You Lose -_-");
+            oppScore++ ;
+            updateLabels() ;
+            System.out.println("OPP Score : "+oppScore);
+            oppWin = true ; 
+     
+        }
+        else if (!myTurn && !tie) 
+        {
+            this.msg.setFill(Color.WHITE);
+            this.msg.setText("You Win :D ");
+            myScore++ ; 
+            updateLabels() ;
+            iWin = true ; 
+        }        
+        else {
+            this.msg.setFill(Color.AZURE);
+            this.msg.setText("Tie");
+            
+        }
+        
+        
+        playAgain.setOnAction((event) -> {
+            System.out.println("Clicked !!!");
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3 ; j++) {
+                    board[i][j].freeTile();
+                    board[i][j].usedBefore = false ; 
+                   
+                }
+            }
+            root.getChildren().removeAll(this,line) ;
+            playable = true ; 
+            movesCounter = 0 ; 
+            tie = false ; 
+        });
+        
+        playAgain.setTranslateY(150);
+        
+        getChildren().addAll(rect, msg , playAgain); 
+        //root.getChildren().addAll(rect,msg);
+        
+         Timeline timeline = new Timeline();
+      
+         timeline.getKeyFrames().add(new KeyFrame(Duration.seconds(2),
+              
+                new KeyValue(rect.heightProperty(), 650) ,
+                new KeyValue(msg.fontProperty(),Font.font(72))
+        ));
+        timeline.play();
+        
+    }
+    
     }
 
     //    Combo Class
@@ -223,8 +367,9 @@ public class Player extends Application {
         public Tile() {
 
             Rectangle border = new Rectangle(200, 200); // Tile Size 200 x 200 
-            border.setFill(null);
-            border.setStroke(Color.BLACK); // Tile Border 
+            border.setFill(Color.LIGHTSEAGREEN);
+            border.setStroke(Color.GREY); // Tile Border
+            border.setStrokeWidth(5);
             setAlignment(Pos.CENTER); // start writing from Center 
 
             text.setFont(Font.font(72)); // increase Text (x or O ) Size
@@ -287,14 +432,18 @@ public class Player extends Application {
                         }
         }
         
+        private void freeTile(){
+        text.setText(null);
+        }
+        
         private void drawX() {
-            text.setFill(Color.RED);
+            text.setFill(Color.GREY);
             text.setText("X");
 
         }
 
         private void drawO() {
-            text.setFill(Color.BLUE);
+            text.setFill(Color.WHITE);
             text.setText("O");
 
         }
