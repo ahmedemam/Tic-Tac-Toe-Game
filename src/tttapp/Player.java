@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tttapp;
+package switchscenestest;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -75,6 +75,7 @@ public class Player extends Application {
             if ("YOUR".equals(msgFromServerArray[0]) && "DATA".equals(msgFromServerArray[1]))
             myId = Integer.parseInt(msgFromServerArray[3]);
             myUserName = msgFromServerArray[4] ; 
+            opponentId = Integer.parseInt(msgFromServerArray[5]);
            System.out.println("My ID : " + myId);
             System.out.println("MY UserName : "+myUserName);
              userNameLabel = new Label() ;
@@ -221,7 +222,8 @@ public void updateLabels(){
 //    check if somebody win  
     private void checkState() {
           
-        movesCounter++ ; 
+        movesCounter++ ;
+        System.out.println("Moves Count = "+movesCounter);     
         for (Combo combo : combos) {
             if (combo.isComplete()) {
                 playable = false;
@@ -298,7 +300,7 @@ public void updateLabels(){
             updateLabels() ;
             iWin = true ; 
         }        
-        else {
+        else if (tie){
             this.msg.setFill(Color.AZURE);
             this.msg.setText("Tie");
             
@@ -412,14 +414,14 @@ public void updateLabels(){
                         for (int col = 0; col < 3; col++) {
                             for (int row = 0; row < 3; row++) {
                                 if (board[col][row] == this) {                                    
-                                    // Special if for Testing 
-                                    if (myId % 2 != 0) {// if my id odd 
-                                        opponentId = myId + 1; // define opponent id  
-                                    } 
-                                    else if (myId % 2 == 0) {
-                                        opponentId = myId - 1;
-                                    }
-                                    
+//                                    // Special if for Testing 
+//                                    if (myId % 2 != 0) {// if my id odd 
+//                                        opponentId = myId + 1; // define opponent id  
+//                                    } 
+//                                    else if (myId % 2 == 0) {
+//                                        opponentId = myId - 1;
+//                                    }
+//                                    
                                   // Send Clicked Tile Data to Server 
                                     myPlayDescription = "GAME PLAY " + myId + " " + opponentId + " " + row + " " + col;
                                     ps.println(myPlayDescription);
