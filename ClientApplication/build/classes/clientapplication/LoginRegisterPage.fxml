@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="clientapplication.LoginRegisterController">
+    <children>
+      <ImageView fitHeight="400.0" fitWidth="700.0" pickOnBounds="true" preserveRatio="true" scaleX="1.4" scaleY="1.4">
+         <image>
+            <Image url="@backgroud.jpg" />
+         </image>
+      </ImageView>
+      <TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="700.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab text="Login">
+               <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Pane layoutX="25.0" layoutY="45.0" prefHeight="277.0" prefWidth="277.0">
+                           <children>
+                              <Label layoutX="53.0" layoutY="58.0" text="email" />
+                              <Label layoutX="53.0" layoutY="109.0" text="password" />
+                              <TextField fx:id="loginEmailTxt" layoutX="53.0" layoutY="74.0" />
+                              <TextField fx:id="loginPasswdTxt" layoutX="53.0" layoutY="125.0" />
+                              <Button layoutX="100.0" layoutY="216.0" mnemonicParsing="false" onAction="#HandleLoginAction" text="login" />
+                           </children>
+                        </Pane>
+                        <ImageView fitHeight="234.0" fitWidth="402.0" layoutX="318.0" layoutY="66.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@img.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </AnchorPane>
+            </content>
+           </Tab>   
+          <Tab text="Signup">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <Pane layoutX="25.0" layoutY="45.0" prefHeight="277.0" prefWidth="277.0">
+                           <children>
+                              <Label layoutX="53.0" layoutY="58.0" text="email" />
+                              <Label layoutX="53.0" layoutY="109.0" text="password" />
+                              <Label layoutX="53.0" layoutY="160.0" text="confirm password" />
+                              <TextField fx:id="signupEmailTxt" layoutX="53.0" layoutY="74.0" />
+                              <TextField fx:id="signupPasswdTxt" layoutX="53.0" layoutY="125.0" />
+                              <TextField fx:id="signupPasswdConfTxt" layoutX="53.0" layoutY="177.0" />
+                              <Button layoutX="103.0" layoutY="216.0" mnemonicParsing="false" onAction="#HandleSignUpAction" text="signup" />
+                              <Label layoutX="53.0" layoutY="161.0" text="confirm password" />
+                              <TextField fx:id="signupUsernameTxt" layoutX="53.0" layoutY="32.0" />
+                              <Label layoutX="53.0" layoutY="6.0" text="username" />
+                              
+                           </children>
+                        </Pane>
+                        <ImageView fitHeight="234.0" fitWidth="402.0" layoutX="318.0" layoutY="66.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@img.png" />
+                           </image>
+                        </ImageView>
+                     </children>
+                  </AnchorPane>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+    </children>
+</AnchorPane>

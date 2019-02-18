@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane id="AnchorPane" prefHeight="439.0" prefWidth="646.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="clientapplication.ChoosePlayerPageController">
+   <children>
+      <SplitPane dividerPositions="0.23136645962732919" layoutX="2.0" layoutY="2.0" prefHeight="439.0" prefWidth="646.0">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="437.0" prefWidth="388.0">
+               <children>
+                  <VBox layoutX="33.0" prefHeight="437.0" prefWidth="280.0" />
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <Label prefHeight="23.0" prefWidth="211.0" text="  :: Play with  ^_^" textFill="#2b1e05" />
+                  <ListView fx:id="usersList" layoutX="6.0" layoutY="23.0" prefHeight="358.0" prefWidth="480.0" />
+                  <Button fx:id="refresh" layoutX="130.0" layoutY="391.0" mnemonicParsing="false" onAction="#updateUsersList" text="refresh" />
+                  <Button fx:id="invite" layoutX="20.0" layoutY="391.0" mnemonicParsing="false"  text="invite !" />
+               </children></AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>
