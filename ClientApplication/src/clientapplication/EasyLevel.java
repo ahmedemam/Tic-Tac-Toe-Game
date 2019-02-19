@@ -1,6 +1,7 @@
 package clientapplication;
 
 
+import java.util.ArrayList;
 import java.util.Optional;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
@@ -38,6 +39,9 @@ public class EasyLevel extends Application{
     private Tile[][] gui_board;
     private char[][] back_end_board;
     private char winner;
+//    private ArrayList<String> positions= new ArrayList<>();
+//    private ArrayList<Text> gameBoard= new ArrayList<>();
+    String data="";
 
     
     public EasyLevel() {
@@ -56,24 +60,30 @@ public class EasyLevel extends Application{
     public void start(Stage primaryStage) throws Exception {
     	
     	Button logout = new Button();
-        logout.setText("Back");
+        logout.setText("Pause");
         logout.setId("logout");
        
         logout.setMaxWidth(Double.MAX_VALUE);
         grid.add(logout, 2,4 , 1, 16);
         
-//        logout.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                try {
-////					Levels levels = new Levels();
-////					levels.start(ClientApp.mainStage);
-//				} catch (Exception e)
-//                                {
-//					e.printStackTrace();
-//				}
-//            }
-//        });
+        logout.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                        Client.sendMessageOut(EasyLevel.this.pause());
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("saved");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Game is saved");
+                        alert.show();
+        //					Levels levels = new Levels();
+//					levels.start(ClientApp.mainStage);
+				} catch (Exception e)
+                                {
+					e.printStackTrace();
+				}
+            }
+        });
         
         Label status = new Label("Player Turn"); 
         
@@ -104,7 +114,7 @@ public class EasyLevel extends Application{
         private int row, col;
 
         public Tile(int row, int col) {
-        	this.row = row;
+            this.row = row;
             this.col = col;
             text = new Text();
             rect = new Rectangle(165, 165);
@@ -135,8 +145,10 @@ public class EasyLevel extends Application{
                     }
                     computerPlay();
                     try {
-						checkWin();
-					} catch (Exception e) {
+			 checkWin();
+                    } 
+                    catch (Exception e)
+                                        {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
@@ -314,6 +326,43 @@ public class EasyLevel extends Application{
 //                }
             }
         }
+    }
+    
+    public String pause()
+    {
+     data="";
+     for(int i =0; i <this.back_end_board.length-1;i++)
+     {
+         for(int j=0; j<this.back_end_board.length-1;j++)
+         {
+             switch (this.back_end_board[i][j]) {
+                 case 'x':
+                     data+="1,";
+                     break;
+                 case 'o':
+                     data+="-1,";
+                     break;
+                 default:
+                     data +="0,";
+                     break;
+             }
+             
+         }
+
+     }
+     switch (this.back_end_board[2][2]) {
+                 case 'x':
+                     data+="1";
+                     break;
+                 case 'o':
+                     data+="-1";
+                     break;
+                 default:
+                     data +="0";
+                     break;
+    }
+     //GAME SAVED data
+              return "GAME SAVED "+ Client.getID()+" "+data;
     }
     public static void main (String args[])
     {

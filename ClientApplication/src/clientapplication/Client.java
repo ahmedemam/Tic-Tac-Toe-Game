@@ -31,8 +31,8 @@ public class Client {
     private LinkedHashMap<String, String> playerData = new LinkedHashMap<String, String>();
     //private LinkedHashMap<String, String> playerData = new LinkedHashMap<String, String>();
     Alert alert = new Alert(AlertType.CONFIRMATION);
-    private static String setterToken = "";
-
+    public  static String setterToken="pre";
+    
     SessionList sessionList = new SessionList();
     PlayerDataSession playerDataSession = new PlayerDataSession();
 
@@ -49,12 +49,12 @@ public class Client {
         serverOut.flush();
     }
 
-    public static String readTokens() {
+    public static String readTokens(){
+        System.out.println("SetterToken : "+setterToken);
         return setterToken;
     }
-
-    public static void setToken(String s) {
-        setterToken = s;
+    public static void clearTokens(){
+        setterToken ="pre" ; 
     }
     /*public static void main(String[] args) throws IOException {
      // TODO code application logic here
@@ -92,7 +92,6 @@ public class Client {
      }
 
      }*/
-
     public boolean connectToServer() {
         try {
             Socket clientSokect = new Socket(serverName, serverPort);
@@ -146,8 +145,18 @@ public class Client {
         }
     }
 
-    private void loggoff() throws IOException {
+       public static void loggoff() throws IOException {
         String cmd = "SIGNOUT PLAYER ";
+       String playerOffline="";
+        for (Map.Entry<String, String> entrySet : PlayerDataSession.playerDataSession.entrySet()) {
+            String key = entrySet.getKey();
+            String value = entrySet.getValue();
+            playerOffline+=key+":"+value+",";
+        }
+        
+        cmd+=playerOffline;
+        
+        
         serverOut.write(cmd.getBytes());
     }
 
@@ -203,7 +212,6 @@ public class Client {
             String clientMessage;
             int counter = 0;
             while ((clientMessage = bufferedIn.readLine()) != null) {
-                System.out.println("caller: " + counter);
                 counter++;
                 String[] inputTokens = clientMessage.split(" ");
 
@@ -216,38 +224,44 @@ public class Client {
                         handleOffline(inputTokens);
                     }
 
+                    // game play 
+                    if ("GAME".equals(inputTokens[0]) && "PLAY".equals(inputTokens[1])) { 
+                        setterToken = clientMessage ; 
+                        readTokens() ;
+//                 s       System.out.println("Changed S : "+setterToken ); 
+                    }
+                    
+                    
                     ////////////handing invitaions
-                    if ("INVITATION".equals(inputTokens[0]) && "REQUEST".equals(inputTokens[1])) {
-
-                        int senderId = Integer.parseInt(inputTokens[3]);
-                        int resiverId = Integer.parseInt(inputTokens[2]);
+                    if ("INVITATION".equals(inputTokens[0]) && "REQUEST".equals(inputTokens[1])) {   //TO DO
                         Platform.runLater(new Runnable() {
-
+                            
+                            int senderId = Integer.parseInt(inputTokens[3]) ;
+                            int recieverId =  Integer.parseInt(inputTokens[2]) ;
+                            
                             @Override
                             public void run() {
                                 Alert alert = new Alert(AlertType.CONFIRMATION);
                                 alert.setTitle("Invitation");
                                 alert.setContentText("new invitation from " + inputTokens[4]);
-
                                 ButtonType buttonAccept = new ButtonType("accept");
                                 ButtonType buttonRejct = new ButtonType("reject");
                                 alert.getButtonTypes().setAll(buttonAccept, buttonRejct);
                                 Optional<ButtonType> result = alert.showAndWait();
                                 if (result.get() == buttonAccept) {
                                     try {
-
-                                        String messageRespone = "INVITATION RESPONSE " + inputTokens[3] + " " + inputTokens[2] + " " + inputTokens[4] + " YES";
-                                        sendMessageOut(messageRespone);
-
-                                        Player player = new Player(senderId, "Hello ", 0, resiverId, "hello ", 0);
-                                        Scene s = new Scene(player.createContent());
-                                        Main.gotoPlay(s);
-                                        alert.close();
+                                        String messageRespone="INVITATION RESPONSE "+inputTokens[3]+" "+inputTokens[2]+" "+inputTokens[4]+" YES"; 
+                                       sendMessageOut(messageRespone);
+                                       
+                                          Game game=new Game(senderId,"Player 2 ",0,recieverId,"Player 1",300,'x');
+                                       Scene s = new Scene (game.createContent()) ; 
+                                       Main.gotoPlay(s);
+                                       alert.close();
                                     } catch (IOException ex) {
                                         System.out.println("error in accept");
                                     }
                                 } else if (result.get() == buttonRejct) {
-                                    String messageRespone = "INVITATION RESPONSE " + inputTokens[3] + " " + inputTokens[2] + " " + inputTokens[4] + " NO";
+                                       String messageRespone="INVITATION RESPONSE "+inputTokens[3]+" "+inputTokens[2]+" "+inputTokens[4]+" NO"; 
                                     try {
                                         sendMessageOut(messageRespone);
                                         alert.close();
@@ -259,64 +273,68 @@ public class Client {
                         });
 
                     }
-                    if ("INVITATION".equals(inputTokens[0]) && "RESPONSE".equals(inputTokens[1])) {
-
-                        int senderId = Integer.parseInt(inputTokens[3]);
-                        int resiverId = Integer.parseInt(inputTokens[2]);
-
+                    if ("INVITATION".equals(inputTokens[0]) && "RESPONSE".equals(inputTokens[1]))
+                    {
+                        
+                        int senderId = Integer.parseInt(inputTokens[3]) ;
+                            int recieverId =  Integer.parseInt(inputTokens[2]) ;
                         System.out.println("yes message state");
-                        if ("YES".equals(inputTokens[5])) {
-                            System.out.println("yes");
+                        if("YES".equals(inputTokens[5]))
+                        { System.out.println("yes");
                             Platform.runLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Alert alert = new Alert(AlertType.CONFIRMATION);
-                                    alert.setTitle("Invitation Acceptance ");
-                                    alert.setContentText("your invetation to " + inputTokens[4] + "is accepted");
-                                    ButtonType buttonPlay = new ButtonType("Start Playing ");
-
-                                    alert.getButtonTypes().setAll(buttonPlay);
-                                    Optional<ButtonType> result = alert.showAndWait();
-                                    if (result.get() == buttonPlay) {
-
-                                        Player player = new Player(senderId, "hello", 0, resiverId, "hello", 0);
-                                        Scene s = new Scene(player.createContent());
-                                        Main.gotoPlay(s);
-                                        alert.close();
-                                    }
-                                }
-                            });
+                            @Override
+                            public void run() {
+                                Alert alert = new Alert(AlertType.CONFIRMATION);
+                                alert.setTitle("Invitation Acceptance ");
+                                alert.setContentText("your invetation to "+inputTokens[4]+"is accepted" );
+                                ButtonType buttonPlay = new ButtonType("Start Playing ");
+                               
+                                alert.getButtonTypes().setAll(buttonPlay);
+                                Optional<ButtonType> result = alert.showAndWait();
+                                if (result.get() == buttonPlay) {
+                                    
+//                                        /////
+                                       Game game=new Game(senderId,"Player 1",0,recieverId,"Player 2",500,'o');
+                                       Scene s = new Scene (game.createContent()) ; 
+                                       Main.gotoPlay(s);
+                                       
+                                       alert.close();
+                                 
+                                } 
+                            }
+                        });
                                                  /////////////////////
-
+                            
+                            
+                            
+                            
                         }
-                        if (inputTokens[5] == "NO") {
+                        if(inputTokens[5]=="NO")
+                        {
+                            
+                                     Platform.runLater(new Runnable() {
 
-                            Platform.runLater(new Runnable() {
-
-                                @Override
-                                public void run() {
-                                    Alert alert = new Alert(AlertType.CONFIRMATION);
-                                    alert.setTitle("Invitation Rejection ");
-                                    alert.setContentText("sorry your invetation to " + inputTokens[4] + "is rejected");
-                                    ButtonType buttonOk = new ButtonType("Ok");
-
-                                    alert.getButtonTypes().setAll(buttonOk);
-                                    Optional<ButtonType> result = alert.showAndWait();
-                                    if (result.get() == buttonOk) {
-
-                                        alert.close();
-
-                                    }
-                                }
-                            });
-
+                            @Override
+                            public void run() {
+                                Alert alert = new Alert(AlertType.CONFIRMATION);
+                                alert.setTitle("Invitation Rejection ");
+                                alert.setContentText("sorry your invetation to "+inputTokens[4]+"is rejected" );
+                                ButtonType buttonOk = new ButtonType("Ok");
+                               
+                                alert.getButtonTypes().setAll(buttonOk);
+                                Optional<ButtonType> result = alert.showAndWait();
+                                if (result.get() == buttonOk) {
+                            
+                                    alert.close();
+                                     
+                                } 
+                            }
+                        });
+                            
+                            
                         }
-
-                    }
-
-                    if ("GAME".equals(inputTokens[0]) && "PLAY".equals(inputTokens[1])) {
-
-                        setterToken = clientMessage;
+                    
+                    
                     }
 
 //                else if ("msg".equalsIgnoreCase(cmd))
@@ -399,6 +417,7 @@ public class Client {
             //System.out.println(playerData.get(keyValuePair[0]));
         }
 
+
         PlayerDataSession.playerDataSession = playerData;
         //PlayerDataSession.playerData=playerArray;
         for (Map.Entry<String, String> entrySet : PlayerDataSession.playerDataSession.entrySet()) {
@@ -408,4 +427,8 @@ public class Client {
         }
 
     }
+        public static String getID()
+    {  
+        return PlayerDataSession.playerDataSession.get("PlayerId");
+}
 }

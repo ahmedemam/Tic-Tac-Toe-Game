@@ -25,7 +25,7 @@ public class LoginRegisterController implements Initializable {
     @FXML
     TextField signupUsernameTxt;
 
-    Client client=new Client("localhost", 4444);
+    Client client=new Client("192.168.1.143", 4444);
     static String sessionUserEmail;
     static String sessionUserPassword;
     String userEmail;

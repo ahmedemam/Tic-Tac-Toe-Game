@@ -27,7 +27,7 @@ public class Main extends Application {
             @Override
             public void handle(WindowEvent event) {
                 try {
-                  //  Client.loggoff();
+                    Client.loggoff();
                     stop();
                     stage.close();
                     Platform.exit();
